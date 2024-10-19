@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{self, BufReader};
 use zip::read::ZipArchive;
 use xml::reader::{EventReader, XmlEvent};
-use std::fs::metadata;
 
 fn main() {
     println!("Enter the .docx file path:");
@@ -11,11 +10,6 @@ fn main() {
     io::stdin().read_line(&mut file_path).expect("Failed to read input");
 
     let file_path = file_path.trim();
-
-    if metadata(file_path).is_err() {
-        println!("File not found: {}", file_path);
-        return;
-    }
 
     let file = File::open(file_path).expect("Could not open the file");
     let reader = BufReader::new(file);
@@ -26,15 +20,22 @@ fn main() {
     let parser = EventReader::new(&mut document_xml);
     let mut text_content = String::new();
     let mut line_count = 0;
+    let mut in_paragraph = false;
 
     for event in parser {
         match event {
             Ok(XmlEvent::StartElement { name, .. }) => {
                 if name.local_name == "p" {
                     line_count += 1;
+                    in_paragraph = true; 
                 }
             }
-            Ok(XmlEvent::Characters(text)) => {
+            Ok(XmlEvent::EndElement { name }) => {
+                if name.local_name == "p" {
+                    in_paragraph = false; 
+                }
+            }
+            Ok(XmlEvent::Characters(text)) if in_paragraph => {
                 text_content.push_str(&text);
                 text_content.push(' ');
             }
