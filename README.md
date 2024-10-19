@@ -11,8 +11,8 @@ cargo build
 ```bash
 cargo run
 ```
-### Note : always use absolute path like
-###  /home/user/Documents/yourfile.docx
-### instead of
-### ./yourfile.docx
+Note : always use absolute path like
+/home/user/Documents/yourfile.docx
+instead of
+./yourfile.docx
 
